@@ -21,10 +21,7 @@ const handleAdd = () => add({ id, name, price, img });
           </ul>
 
           <div className="d-flex justify-content-between align-items-center mt-auto">
-            {}
             <span className="fw-bold fs-5">{clp(price)}</span>
-
-            {}
             <button className="btn btn-primary" onClick={handleAdd}>
               Añadir
             </button>

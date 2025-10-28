@@ -1,11 +1,27 @@
 import { clp } from "../utils/format.js";
 import { useCart } from "../context/CartContext.jsx";
+import { useUser } from "../context/UserContext.jsx";
 import { pizzas } from "../data/pizzas.js";
 
 const Cart = () => {
   const { cart, inc, dec, add, total } = useCart();
+  const { token } = useUser();
 
   const isEmpty = cart.length === 0;
+
+   const handleAdd = (p) => {
+    
+    if (!add) return console.warn("Función add no disponible en el contexto");
+    try {
+      add(p); 
+    } catch (e) {
+      try {
+        add(p.id);
+      } catch (err) {
+        console.error("No se pudo añadir la pizza al carrito", err);
+      }
+    }
+  };
 
   return (
     <main className="container py-4">

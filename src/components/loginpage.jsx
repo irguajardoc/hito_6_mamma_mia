@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useUser } from "../context/UserContext.jsx";
+import { useNavigate } from "react-router-dom";
 
 const LoginPage = () => {
   const [form, setForm] = useState({ email: "", password: "" });
@@ -7,7 +9,9 @@ const LoginPage = () => {
   const onChange = (e) =>
     setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
 
-  const handleSubmit = (e) => {
+const { login } = useUser();
+  const navigate = useNavigate();
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const { email, password } = form;
 
@@ -15,10 +19,12 @@ const LoginPage = () => {
       return setMsg({ type: "danger", text: "Todos los campos son obligatorios." });
     }
     if (password.length < 6) {
-      return setMsg({ type: "warning", text: "La contraseña debe tener al menos 8 caracteres." });
+      return setMsg({ type: "warning", text: "La contraseña debe tener al menos 6 caracteres." });
     }
 
     setMsg({ type: "success", text: "Inicio de sesión exitoso" });
+    await login(email, password); 
++   navigate("/");
   };
 
   return (

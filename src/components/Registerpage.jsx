@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useUser } from "../context/UserContext.jsx";
+import { useNavigate } from "react-router-dom";
 
 const RegisterPage = () => {
   const [form, setForm] = useState({ email: "", password: "", confirm: "" });
