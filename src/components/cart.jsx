@@ -9,8 +9,11 @@ const Cart = () => {
 
   const isEmpty = cart.length === 0;
 
-   const handleAdd = (p) => {
-    
+// HITO 8
+  const [status, setStatus] = useState({ type: "", text: "" });
+  const [loading, setLoading] = useState(false);
+
+   const handleAdd = (p) => {    
     if (!add) return console.warn("Función add no disponible en el contexto");
     try {
       add(p); 
@@ -23,14 +26,54 @@ const Cart = () => {
     }
   };
 
+    // HITO 8
+  const handlePay = async () => {
+    setStatus({ type: "", text: "" });
+    if (!token) {
+      setStatus({ type: "danger", text: "Debes iniciar sesión para comprar." });
+      return;
+    }
+    if (total === 0 || isEmpty) {
+      setStatus({ type: "warning", text: "Tu carrito está vacío." });
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const res = await fetch(`${API_URL}/api/checkouts`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`, 
+        },
+        body: JSON.stringify({ cart }), 
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err?.message || "No fue posible procesar el pago.");
+      }
+      setStatus({ type: "success", text: "¡Compra realizada con éxito! ✅" }); 
+    } catch (e) {
+      setStatus({ type: "danger", text: e.message });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
   return (
     <main className="container py-4">
       <h2 className="mb-4">Tu Carrito 🧺</h2>
 
+      {status.text && (
+        <div className={`alert alert-${status.type}`}>{status.text}</div>
+      )}
+
+        
       {isEmpty ? (
         <>
           <div className="alert alert-info">No tienes productos en el carrito.</div>
-          {}
           <h5 className="mt-3">Sigue comprando 🍕</h5>
           <div className="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4">
             {pizzas.map((p) => (
@@ -38,10 +81,19 @@ const Cart = () => {
                 <div className="card h-100 shadow-sm">
                   <img src={p.img} className="card-img-top" alt={p.name} />
                   <div className="card-body d-flex flex-column">
-                    <h6 className="card-title">{p.name}</h6>
+                    <h5 className="card-title">{p.name}</h5>
+                    {p.ingredients && (
+                      <p className="text-muted small mb-2">
+                        {p.ingredients.join(" · ")}
+                      </p>
+                    )}
+                    <p className="mb-2 text-muted">ID: {p.id}</p>
                     <p className="fw-bold mb-3">${clp(p.price)}</p>
-                    <button className="btn btn-primary mt-auto" onClick={() => add(p.id)}>
-                      Añadir
+                    <button
+                      className="btn btn-primary mt-auto"
+                      onClick={() => handleAdd(p)}
+                    >
+                      Añadir al carrito
                     </button>
                   </div>
                 </div>
@@ -65,13 +117,27 @@ const Cart = () => {
                     />
                     <div className="me-auto">
                       <h6 className="mb-1">{it.name}</h6>
-                      <small className="text-muted">Precio unitario: ${clp(it.price)}</small>
+                      <small className="text-muted">
+                        Precio unitario: ${clp(it.price)}
+                      </small>
                     </div>
 
                     <div className="btn-group" role="group" aria-label="qty">
-                      <button className="btn btn-outline-secondary" onClick={() => dec(it.id)}>−</button>
+                      <button
+                        className="btn btn-outline-secondary"
+                        onClick={() => dec(it.id)}
+                        disabled={loading}
+                      >
+                        −
+                      </button>
                       <span className="btn btn-light disabled">{it.qty}</span>
-                      <button className="btn btn-outline-secondary" onClick={() => inc(it.id)}>+</button>
+                      <button
+                        className="btn btn-outline-secondary"
+                        onClick={() => inc(it.id)}
+                        disabled={loading}
+                      >
+                        +
+                      </button>
                     </div>
 
                     <div className="ms-3 text-end" style={{ minWidth: 120 }}>
@@ -92,17 +158,26 @@ const Cart = () => {
                   <span>Total</span>
                   <strong>${clp(total)}</strong>
                 </div>
-                <button className="btn btn-success w-100 mt-2" disabled={isEmpty}>
-                  Pagar
+
+                
+                <button
+                  className="btn btn-success w-100 mt-2"
+                  disabled={!token || total === 0 || loading}
+                  onClick={handlePay}
+                  title={!token ? "Inicia sesión para comprar" : "Pagar ahora"}
+                >
+                  {loading ? "Procesando..." : "Pagar"}
                 </button>
+
                 <small className="d-block text-muted mt-2">
-                  * Botón sin acción por ahora.
+                   * Requiere sesión iniciada para procesar el pago.
                 </small>
               </div>
             </div>
           </div>
         </div>
       )}
+      
     </main>
   );
 };

@@ -2,97 +2,70 @@ import { useState } from "react";
 import { useUser } from "../context/UserContext.jsx";
 import { useNavigate } from "react-router-dom";
 
+//hito 8
 const LoginPage = () => {
+  const navigate = useNavigate();
+  const { login, loading, error, isAuth } = useUser();
   const [form, setForm] = useState({ email: "", password: "" });
-  const [msg, setMsg] = useState({ type: "", text: "" });
+  const [msg, setMsg] = useState("");
 
   const onChange = (e) =>
     setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
 
-const { login } = useUser();
-  const navigate = useNavigate();
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const { email, password } = form;
-
-    if (!email || !password) {
-      return setMsg({ type: "danger", text: "Todos los campos son obligatorios." });
+    setMsg("");
+    const { ok, error: err } = await login(form);
+    if (ok) {
+      setMsg("Ingreso exitoso");
+      navigate("/profile");
+    } else {
+      setMsg(err || "No fue posible iniciar sesión");
     }
-    if (password.length < 6) {
-      return setMsg({ type: "warning", text: "La contraseña debe tener al menos 6 caracteres." });
-    }
-
-    setMsg({ type: "success", text: "Inicio de sesión exitoso" });
-    await login(email, password); 
-+   navigate("/");
   };
 
+  if (isAuth) {
+    navigate("/profile");
+  }
+
   return (
-    <section className="container my-4">
-      <div className="hero mb-4" style={{ minHeight: 160 }}>
-        <div className="hero__center">
-          <div className="hero__card">
-            <h2 className="mb-1">Iniciar sesión</h2>
-            <p className="mb-0">Ingresa con tu email y contraseña</p>
-          </div>
+    <div className="container py-4">
+      <h2>Login</h2>
+      {msg && <div className="alert alert-info">{msg}</div>}
+      {error && <div className="alert alert-danger">{error}</div>}
+
+      <form onSubmit={handleSubmit} className="col-12 col-md-6 p-0">
+        <div className="mb-3">
+          <label className="form-label">Email</label>
+          <input
+            name="email"
+            className="form-control"
+            type="email"
+            value={form.email}
+            onChange={onChange}
+            required
+            autoComplete="username"
+          />
         </div>
-      </div>
 
-      <div className="row justify-content-center">
-        <div className="col-12 col-md-8 col-lg-6">
-          <div className="card shadow-sm border-0 rounded-3">
-            <div className="card-body p-4">
-              <h5 className="card-title mb-3">Acceso</h5>
-
-              {msg.text && <div className={`alert alert-${msg.type} mb-3`}>{msg.text}</div>}
-
-              <form onSubmit={handleSubmit} noValidate>
-                <div className="mb-3">
-                  <label className="form-label">Email</label>
-                  <div className="input-group">
-                    <span className="input-group-text">📧</span>
-                    <input
-                      type="email"
-                      name="email"
-                      className="form-control"
-                      placeholder="ejemplo@correo.com"
-                      value={form.email}
-                      onChange={onChange}
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="mb-4">
-                  <label className="form-label">Contraseña</label>
-                  <div className="input-group">
-                    <span className="input-group-text">🔒</span>
-                    <input
-                      type="password"
-                      name="password"
-                      className="form-control"
-                      placeholder="Mínimo 8 caracteres"
-                      value={form.password}
-                      onChange={onChange}
-                      required
-                      minLength={6}
-                    />
-                  </div>
-                </div>
-
-                <button type="submit" className="btn btn-success w-100">
-                  Ingresar
-                </button>
-              </form>
-            </div>
-          </div>
-
-          <p className="text-center text-muted small mt-3">
-            ¿No tienes cuenta? Regístrate desde el menú.
-          </p>
+        <div className="mb-3">
+          <label className="form-label">Password</label>
+          <input
+            name="password"
+            className="form-control"
+            type="password"
+            value={form.password}
+            onChange={onChange}
+            required
+            autoComplete="current-password"
+          />
         </div>
-      </div>
-    </section>
+
+        <button className="btn btn-primary" disabled={loading}>
+          {loading ? "Ingresando..." : "Ingresar"}
+        </button>
+      </form>
+    </div>
   );
 };
 

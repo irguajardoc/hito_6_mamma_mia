@@ -6,7 +6,9 @@ import { useUser } from "../context/UserContext.jsx";
 const Navbar = () => {
     const { total } = useCart(); 
     const { token, logout } = useUser();
+
     const navigate = useNavigate();
+
     const handleLogout = () => {
         logout();
         navigate("/login");
@@ -41,7 +43,10 @@ const Navbar = () => {
                         <NavLink to="/profile" className={linkClass}>
                             👤 Profile
                         </NavLink>
-                        <button className="btn btn-outline-warning" onClick={handleLogout}>
+                        <button className="btn btn-outline-warning" onClick={handleLogout}
+                        title={email ? `Cerrar sesión de ${email}` : "Cerrar sesión"}
+                        
+                        >
                             🔒 Logout
                         </button>
                     </>
