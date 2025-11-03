@@ -29,3 +29,17 @@ hito 6
 - incrementa y reduce cantidad
 - nombre ingredientes imagen precio, boton añadir 
 
+
+hito 7 
+
+- Creación de UserContext 
+- token, login, logout.
+- PrivateRoute protege /profile.
+- RedirectIfAuth evita que usuarios logeados accedan a /login o /register.
+
+hito 8 
+
+- conectar la app con un backend real con JWT.
+- Autenticación UserContext, export const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
+
